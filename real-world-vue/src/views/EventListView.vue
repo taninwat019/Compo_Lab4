@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import EventCard from '../components/EventCard.vue'
-import EventCard2 from '../components/EventCard2.vue'
 import type { EventItem } from '@/type'
 import { ref, watchEffect, type Ref, computed } from 'vue'
 import EventService from '@/services/EventService'
-import type { Axios, AxiosResponse } from 'axios'
+import type { AxiosResponse } from 'axios'
 import { useRouter } from 'vue-router'
 import NProgress from 'nprogress'
 import { onBeforeRouteUpdate } from 'vue-router'
 
+
+const router = useRouter()
 const events: Ref<EventItem[]> = ref([])
 const totalEvent = ref<number>(0)
 const props = defineProps({
@@ -22,25 +23,37 @@ const props = defineProps({
   }
 })
 
-EventService.getEvent(2, props.page).then((response: AxiosResponse<EventItem[]>) => {
+EventService.getEvent(3, props.page).then((response: AxiosResponse<EventItem[]>) => {
   events.value = response.data
   totalEvent.value = response.headers['x-total-count']
 }).catch(() => {
   router.push({ name: 'NetworkError' })
 })
+// .finally(() => {
+//   NProgress.done()
+// })
 
-onBeforeRouteUpdate((to, from, next) =>{
+onBeforeRouteUpdate((to, from, next) => {
   const toPage = Number(to.query.page)
-  EventService.getEvent(2, toPage).then((response: AxiosResponse<EventItem[]>) =>{
+  // NProgress.start()
+  EventService.getEvent(3, toPage).then((response: AxiosResponse<EventItem[]>) => {
     events.value = response.data
     totalEvent.value = response.headers['x-total-count']
     next()
   }).catch(() => {
-    next({name: 'NetworkError' })
+    next({ name: 'NetworkError' })
   })
+  // }).finally(() => {
+  //   NProgress.done()
+  // })
 })
 
-const router = useRouter()
+NProgress.start()  
+EventService.getEvent(props.limit, props.page).then((response: AxiosResponse<EventItem[]>) => {
+events.value = response.data
+totalEvent.value = response.headers['x-total-count']
+})
+
 
 const limit = ref(props.limit)
 
@@ -58,7 +71,7 @@ const decreaseLimit = () => {
 
 const hasNextPage = computed(() => {
   //first calculate the total page
-  const totalPages = Math.ceil(totalEvent.value / 2)
+  const totalPages = Math.ceil(totalEvent.value / 3)
   return props.page.valueOf() < totalPages
 })
 </script>

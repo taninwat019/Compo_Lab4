@@ -10,7 +10,6 @@ import EventLayoutView from '../views/event/EventLayoutView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import NetworkErrorView from '../views/NetworkErrorView.vue'
 import NProgress from 'nprogress'
-import EventsService from '@/services/EventService'
 import EventService from '@/services/EventService'
 import { useEventStore } from '@/stores/event'
 
@@ -46,24 +45,24 @@ const router = createRouter({
       path: '/event/:id',
       name: 'event-layout',
       component: EventLayoutView,
-      props: true,
-        beforeEnter: (to) =>{
-          const id: number = parseInt(to.params.id as string)
-          const eventStore = useEventStore()
-          return EventService.getEventById(id)
-          .then((response) => {
-            eventStore.setEvent(response.data)
-          }).catch((error) => {
-            if (error.response && error.response.status === 404){
-              return {
-                name: '404-resource',
-                params: { resource: 'event'}
-              }
-            }else{
-              return { name: 'network-error'}
-            }
-          })
-        },
+      // props: true,
+      beforeEnter: (to) => {
+        const id: number = parseInt(to.params.id as string)
+        const eventStore = useEventStore()
+        return EventService.getEventById(id)
+        .then((response) => {
+          eventStore.setEvent(response.data)
+        }).catch(() => {
+          if (error.response && error.response.status === 404) {
+           return {
+            name: '404-resource',
+            params: { resource: 'event'}
+           }
+          }else{
+            return { name: 'network-error'}
+          }
+        })
+      },
 
       children: [
         { 
@@ -75,23 +74,22 @@ const router = createRouter({
         {
           path: 'edit',
           name: 'event-edit',
-          props: true,
+          // props: true,
           component: EventEditView
       },
         {
           path: 'register',
           name: 'event-register',
-          props: true,
+          // props: true,
           component: EventRegisterView
         }
-        
       ]
     },
     {
-      path: '/404/:resource',
-      name: '404-resource',
+      path:'/404/:resource',
+      name:'404-resource',
       component: NotFoundView,
-      props: true
+      props:true
     },
     {
       path: '/:catchAll(.*)',
@@ -99,11 +97,18 @@ const router = createRouter({
       component: NotFoundView
     },
     {
-      path: '/network-error',
+      path:'/network-error',
       name: 'network-error',
       component: NetworkErrorView
     }
-  ]
+  ],
+  scrollBehavior(to , from, savedPosition){
+    if(savedPosition){
+      return savedPosition
+    }else{
+      return {top: 0}
+    }
+  }
 })
 
 router.beforeEach(() => {
