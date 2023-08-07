@@ -6,7 +6,7 @@ import { ref, watchEffect, type Ref, computed } from 'vue'
 import EventService from '@/services/EventService'
 import type { Axios, AxiosResponse } from 'axios'
 import { useRouter } from 'vue-router'
-
+import NProgress from 'nprogress'
 
 const events: Ref<EventItem[]> = ref([])
 const totalEvent = ref<number>(0)
@@ -22,14 +22,16 @@ const props = defineProps({
 })
 
 
-watchEffect(() => {
-  EventService.getEvent(props.limit, props.page).then((response: AxiosResponse<EventItem[]>) => {
+NProgress.start()
+EventService.getEvent(2, props.page).then((response: AxiosResponse<EventItem[]>) => {
   events.value = response.data
   totalEvent.value = response.headers['x-total-count']
-  })
+}).catch(() => {
+  router.push({ name: 'NetworkError' })
+}).finally(() => {
+  NProgress.done()
 })
-console.log(props.limit)
-console.log(props.page)
+
 const router = useRouter()
 
 const limit = ref(props.limit)
