@@ -1,7 +1,7 @@
 import type { EventItem } from '@/type'
 import { defineStore } from 'pinia'
 
-export const useEventsStore = defineStore('event', {
+export const useEventStore = defineStore('event', {
     state: () => ({
         event: null as EventItem | null
     }),
