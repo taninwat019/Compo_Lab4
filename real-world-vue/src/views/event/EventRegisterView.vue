@@ -36,7 +36,7 @@ function register() {
 
 <template>
     <p>Registration from here</p>
-    <button @click="register">Edit Me</button>
+    <button @click="register">Register Me</button>
 </template>
 
 
